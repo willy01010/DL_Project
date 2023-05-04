@@ -4,6 +4,8 @@ import numpy as np
 import math
 import time
 
+track = []
+status = False
 
 if __name__ == '__main__':
 
@@ -33,6 +35,7 @@ if __name__ == '__main__':
             # To improve performance, optionally mark the image as not writeable to
             # pass by reference.
             image.flags.writeable = False
+            # 把影像丟入mp作處理
             results = hands.process(image)
 
             # Draw the hand annotations on the image.
@@ -122,45 +125,42 @@ if __name__ == '__main__':
                     p14 = np.array([THUMB_MCP_X_value, THUMB_MCP_Y_value])
                     p15 = p14 - p13
                     distance_THUMB = math.hypot(p15[0], p15[1])
+                    # -------------------------------------
 
                     result = ''
-                    if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
-                        print('one', distance_INDEX)
-                        result = 'one'
-
-                    if ((distance_THUMB > 0.1) and (distance_INDEX < 0.1) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY > 0.1)):
-                        print('six', distance_THUMB, ':', distance_PINKY)
-                        result = 'six'
-
-                    if ((distance_THUMB > 0.1) and (distance_INDEX > 0.1) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
-                        print('seven', distance_THUMB, ':', distance_PINKY)
-                        result = 'seven'
 
                     if ((distance_THUMB < 0.1) and (distance_INDEX < 0.1) and
                             (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
-                        print('zero', distance_THUMB, ':', distance_PINKY)
-                        result = 'zero'
+                        result = 'clear'
+                        track = []
+
+                    if ((distance_THUMB > 0.1) and (distance_INDEX < 0.1) and
+                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY > 0.1)):
+                        result = 'pause'
+                        status = False
 
                     if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
-                            (distance_MIDDLE > 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
-                        print('2', distance_THUMB, ':', distance_PINKY)
-                        result = '2'
+                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
+                        result = 'drawing'
+                        status = True
 
-                    if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
-                            (distance_MIDDLE > 0.1) and (distance_RING > 0.1) and (distance_PINKY < 0.1)):
-                        print('3', distance_THUMB, ':', distance_PINKY)
-                        result = '3'
 
-                    if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
-                            (distance_MIDDLE > 0.1) and (distance_RING > 0.1) and (distance_PINKY > 0.1)):
-                        print('4', distance_THUMB, ':', distance_PINKY)
-                        result = '4'
+                    if status:
+                        track.append([INDEX_FINGER_TIP_X_value, INDEX_FINGER_TIP_Y_value])
 
-                    cv2.putText(image, 'result:' + str(result), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 100, 100),
+                    cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width),
+                                       int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)
+
+
+                    for i in range(0, len(track)):
+                        cv2.circle(image, (int(track[i][0] * image_width), int(track[i][1] * image_height)), 5,
+                                   (255, 100, 0), -1)
+
+
+                    cv2.putText(image, 'result:' + str(result), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                (255, 100, 100),
                                 5, cv2.LINE_AA)
+                    # -------------------------------------
 
                     if ((distance_THUMB > 0.1) and (distance_INDEX < 0.1) and
                             (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
@@ -178,8 +178,8 @@ if __name__ == '__main__':
                     else:
                         print('無法辨識')
 
-                    mp_drawing.draw_landmarks(
-                        image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                    # mp_drawing.draw_landmarks(
+                    #     image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
             cv2.imshow('MediaPipe Hands', image)
             if cv2.waitKey(5) & 0xFF == 27:
