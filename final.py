@@ -4,8 +4,19 @@ import numpy as np
 import math
 import time
 
+
 track = []
 status = False
+#button_pressed = False
+#button_name = "Capture"
+
+sumi_img = cv2.imread("mouse.jpg")
+
+#def button_click(event, x, y, flags, param):
+ #   global button_pressed
+  #  if event == cv2.EVENT_LBUTTONDOWN:
+   #     if 10 < x < 200 and 60 < y < 120:
+    #        button_pressed = True
 
 if __name__ == '__main__':
 
@@ -23,7 +34,7 @@ if __name__ == '__main__':
             image_size = image.shape
             image_height = image_size[0]
             image_width = image_size[1]
-
+            print('image_height:',image_height,',image_width:',image_width)
             if not success:
                 print("Ignoring empty camera frame.")
                 # If loading a video, use 'break' instead of 'continue'.
@@ -45,9 +56,9 @@ if __name__ == '__main__':
             # print(len(results))
 
             if results.multi_hand_landmarks:
-                print('**********************************************************')
-                print(len(results.multi_hand_landmarks))
-                print('**********************************************************')
+                #print('**********************************************************')
+                #print(len(results.multi_hand_landmarks))
+                #print('**********************************************************')
 
                 for hand_landmarks in results.multi_hand_landmarks:
                     MIDDLE_FINGER_TIP_X = int(
@@ -134,8 +145,8 @@ if __name__ == '__main__':
                         result = 'clear'
                         track = []
 
-                    if ((distance_THUMB > 0.1) and (distance_INDEX < 0.1) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY > 0.1)):
+                    if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
+                            (distance_MIDDLE > 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
                         result = 'pause'
                         status = False
 
@@ -153,41 +164,36 @@ if __name__ == '__main__':
 
 
                     for i in range(0, len(track)):
-                        cv2.circle(image, (int(track[i][0] * image_width), int(track[i][1] * image_height)), 5,
-                                   (255, 100, 0), -1)
+                        if i > 0:
+                            cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
+             (int(track[i][0] * image_width), int(track[i][1] * image_height)), (255, 100, 0), 5)
 
 
-                    cv2.putText(image, 'result:' + str(result), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                (255, 100, 100),
+                    cv2.putText(image, 'Status:' + str(result), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                (0, 0, 255),
                                 5, cv2.LINE_AA)
                     # -------------------------------------
 
-                    # 按下a即可擷取影像
-                    if cv2.waitKey(5) & 0xFF == ord('a'):
-                        cv2.imwrite('capture' + str(int(time.time())) + '.jpg', image)
-
-
-                    if ((distance_THUMB > 0.1) and (distance_INDEX < 0.1) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
-                        print('讚', distance_THUMB)
-                        # 按下a即可擷取影像
-                        if cv2.waitKey(5) & 0xFF == ord('a'):
-                            cv2.imwrite('good' + str(int(time.time())) + '.jpg', image)
-                        elif ((distance_THUMB > 0.1) and (distance_INDEX > 0.1) and
-                              (distance_MIDDLE > 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
-                            print('勝利')
-                        # 按下a即可擷取影像
-                        if cv2.waitKey(5) & 0xFF == ord('a'):
-                            cv2.imwrite('victory' + str(int(time.time())) + '.jpg', image)
-
-                    else:
-                        print('無法辨識')
+                    
+            
+            #cv2.putText(image, button_name, (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 100, 100), 5, cv2.LINE_AA)
+            #cv2.rectangle(image, (10, 60), (200, 120), (0, 255, 0), -1)
 
                     # mp_drawing.draw_landmarks(
                     #     image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-            cv2.imshow('MediaPipe Hands', image)
+            # 確保圖像大小相同
+            sumi_img = cv2.resize(sumi_img, (image.shape[1], image.shape[0]))
+
+            #sumi_img = cv2.resize(sumi_img, (128, 128))
+            
+            # 設定疊加的權重 (alpha 值)
+            alpha = 0.5
+
+            # 疊加圖像
+            blended_img = cv2.addWeighted(image, 1-alpha, sumi_img, alpha, 0)
+            cv2.imshow('MediaPipe Hands', blended_img)
             if cv2.waitKey(5) & 0xFF == 27:
                 break
     cap.release()
-
+    cv2.destroyAllWindows()
