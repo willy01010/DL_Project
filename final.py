@@ -4,7 +4,7 @@ import numpy as np
 import math
 import time
 
-
+result = ''
 track = []
 combine = []
 status = False
@@ -12,17 +12,16 @@ change = False
 c=0
 last_c_time = 0
 
+colorSelect = 0
+color=[]
+colorlist = [(255, 100, 0), (0, 255, 0), (0, 0, 255), (255, 0, 255), (255, 255, 0), (0, 255, 255)]#bgr 藍 綠 紅 紫 黃 青
+
 showSumi = True
 #button_pressed = False
 #button_name = "Capture"
 
 sumi_img = cv2.imread("resize.png")
 
-#def button_click(event, x, y, flags, param):
- #   global button_pressed
-  #  if event == cv2.EVENT_LBUTTONDOWN:
-   #     if 10 < x < 200 and 60 < y < 120:
-    #        button_pressed = True
 
 if __name__ == '__main__':
 
@@ -144,23 +143,23 @@ if __name__ == '__main__':
                     distance_THUMB = math.hypot(p15[0], p15[1])
                     # -------------------------------------
 
-                    result = ''
+                    
 
                     if ((distance_THUMB < 0.1) and (distance_INDEX < 0.1) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
+                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):#0
                         result = 'clear'
                         combine = []
                         track = []
                         c=0
 
                     if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
-                            (distance_MIDDLE > 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
+                            (distance_MIDDLE > 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):#2
                         result = 'pause'
                         status = False
                         change = True
 
-                    if ((distance_THUMB < 0.1) and (distance_INDEX > 0.05) and
-                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):
+                    if ((distance_THUMB < 0.1) and (distance_INDEX > 0.1) and
+                            (distance_MIDDLE < 0.1) and (distance_RING < 0.1) and (distance_PINKY < 0.1)):#1
                         result = 'drawing'
                         status = True
 
@@ -170,13 +169,26 @@ if __name__ == '__main__':
                             showSumi = False
                         else:
                             showSumi = True
-                        
+                    
+                    if cv2.waitKey(5) & 0xFF == ord('1'):#選取顏色
+                        colorSelect = 0
+                    if cv2.waitKey(5) & 0xFF == ord('2'):
+                        colorSelect = 1
+                    if cv2.waitKey(5) & 0xFF == ord('3'):
+                        colorSelect = 2
+                    if cv2.waitKey(5) & 0xFF == ord('4'):
+                        colorSelect = 3
+                    if cv2.waitKey(5) & 0xFF == ord('5'):
+                        colorSelect = 4
+                    if cv2.waitKey(5) & 0xFF == ord('6'):
+                        colorSelect = 5                  
 
 
                     if status:
                         if change:
                             if time.time() - last_c_time > 1:
                                 c = c + 1
+                                color.append(colorlist[colorSelect])
                                 combine.append(track)
                                 track = []
                                 last_c_time = time.time()
@@ -185,27 +197,29 @@ if __name__ == '__main__':
 
                         
 
-                    cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width), int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)
+                    cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width), int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)#當前手指位置
 
                     
     
-                    # if c < 1:
-                    for i in range(1, len(track)):
-                        cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
-                                (int(track[i][0] * image_width), int(track[i][1] * image_height)), (255, 100, 0), 5)
-                    # else:
-                    for i in range(len(combine)):
-                        for j in range(1, len(combine[i])):
-                            cv2.line(image, (int(combine[i][j-1][0] * image_width), int(combine[i][j-1][1] * image_height)),
-                                    (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), (255, 100, 0), 5)
+            
+            for i in range(1, len(track)):#當前筆畫畫出連接線
+                cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
+                        (int(track[i][0] * image_width), int(track[i][1] * image_height)), colorlist[colorSelect], 5)
+            
+            for i in range(len(combine)):#歷史筆畫畫出連接線
+                for j in range(1, len(combine[i])):
+                    cv2.line(image, (int(combine[i][j-1][0] * image_width), int(combine[i][j-1][1] * image_height)),
+                            (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), color[i], 5)
 
 
 
 
-                    cv2.putText(image, 'Status:' + str(result) + ' Times:' + str(c), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                (0, 0, 255),
-                                5, cv2.LINE_AA)
-                    # -------------------------------------
+            cv2.putText(image, 'Status:' + str(result) + ' Times:' + str(c), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 0, 255),
+                        3, cv2.LINE_AA)
+            
+            cv2.rectangle(image, (20, 60), (100, 100), colorlist[colorSelect], -1)
+                # -------------------------------------
 
                     
             
@@ -217,16 +231,16 @@ if __name__ == '__main__':
             sumi_img = cv2.resize(sumi_img, (image.shape[1], image.shape[0]))
 
             
-            # 設定疊加的權重 (alpha 值)
+            # 設定疊加的權重 (alpha 值)透明度
             alpha = 0.5
 
-            # 疊加圖像
+            # 疊加圖像(矩陣相乘)
             blended_img = cv2.addWeighted(image, 1-alpha, sumi_img, alpha, 0)
 
             # 按下a即可擷取影像
             if showSumi:
                 if cv2.waitKey(5) & 0xFF == ord('a'):
-                    cv2.imwrite('image sktech at ' + str(int(time.time())) + '.jpg', blended_img)
+                    cv2.imwrite('image sktech at ' + str(int(time.time())) + '.jpg', blended_img)#寫入圖像
                 cv2.imshow('MediaPipe Hands', blended_img)
             else:
                 if cv2.waitKey(5) & 0xFF == ord('a'):
