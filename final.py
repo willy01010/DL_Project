@@ -165,15 +165,46 @@ if __name__ == '__main__':
                         # c = c+1
                         result = 'change'
 
+# ---------------------------------------
                     if status:
                         if change:
-                            if time.time() - last_c_time >1:
-                                c = c+1
-                                combine.append([track])
+                            if time.time() - last_c_time > 1:
+                                c = c + 1
+                                combine.append(track)
                                 track = []
                                 last_c_time = time.time()
-                                change = False                           
+                                change = False
                         track.append([INDEX_FINGER_TIP_X_value, INDEX_FINGER_TIP_Y_value])
+
+                    cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width), int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)
+
+                    print("c:", c)
+    
+                    # if c < 1:
+                    print("len(track)", len(track))
+                    for i in range(1, len(track)):
+                        cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
+                                (int(track[i][0] * image_width), int(track[i][1] * image_height)), (255, 100, 0), 5)
+                    # else:
+                    for i in range(len(combine)):
+                        print("len(track)", len(combine[i]))
+                        for j in range(1, len(combine[i])):
+                            print("combine[i][j-1][0]:", combine[i][j-1][0], "combine[i][j-1][1]:", combine[i][j-1][1])
+                            print("combine[i][j][0]:", combine[i][j][0], "combine[i][j][1]:", combine[i][j][1])
+                            cv2.line(image, (int(combine[i][j-1][0] * image_width), int(combine[i][j-1][1] * image_height)),
+                                    (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), (255, 100, 0), 5)
+
+# ---------------------------------------
+
+                    # if status:
+                    #     if change:
+                    #         if time.time() - last_c_time >1:
+                    #             c = c+1
+                    #             combine.append([track])
+                    #             track = []
+                    #             last_c_time = time.time()
+                    #             change = False                           
+                    #     track.append([INDEX_FINGER_TIP_X_value, INDEX_FINGER_TIP_Y_value])
 
                     # if status:
                     #     if change:
@@ -181,27 +212,27 @@ if __name__ == '__main__':
                     #         c = c+1
                     #     track[c].append([INDEX_FINGER_TIP_X_value, INDEX_FINGER_TIP_Y_value])
 
-                    cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width),
-                                       int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)
+                    # cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width),
+                    #                    int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)
 
                     
-                    print("c:",c)
+                    # print("c:",c)
                     # print("combine:",combine)
-                    if c <1:
-                        print("len(track)",len(track))
-                        for i in range(0, len(track)):
-                            if i > 0:
-                                cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
-                                        (int(track[i][0] * image_width), int(track[i][1] * image_height)), (255, 100, 0), 5)
-                    else:
-                        for i in range(0,len(combine)):
-                            print("len(track)",len(track),"len(track[i]):",len(track[i]))
-                            for j in range(0,len(combine[i])):
-                                if j > 0:
-                                    print("combine[i][j-1][0]:",combine[i][j-1][0],"combine[i][j-1][1]:",combine[i][j-1][1])
-                                    print("combine[i][j][0]:",combine[i][j][0],"combine[i][j][1]:",combine[i][j][1])
-                                    cv2.line(image, (int(combine[i][j-1][0] * image_width), int(combine[i][j-1][1] * image_height)),
-                                            (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), (255, 100, 0), 5)
+                    # if c <1:
+                    #     print("len(track)",len(track))
+                    #     for i in range(0, len(track)):
+                    #         if i > 0:
+                    #             cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
+                    #                     (int(track[i][0] * image_width), int(track[i][1] * image_height)), (255, 100, 0), 5)
+                    # else:
+                    #     for i in range(0,len(combine)):
+                    #         print("len(track)",len(track),"len(track[i]):",len(track[i]))
+                    #         for j in range(0,len(combine[i])):
+                    #             if j > 0:
+                    #                 print("combine[i][j-1][0]:",combine[i][j-1][0],"combine[i][j-1][1]:",combine[i][j-1][1])
+                    #                 print("combine[i][j][0]:",combine[i][j][0],"combine[i][j][1]:",combine[i][j][1])
+                    #                 cv2.line(image, (int(combine[i][j-1][0] * image_width), int(combine[i][j-1][1] * image_height)),
+                    #                         (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), (255, 100, 0), 5)
 
                     # for i in range(0, len(track)):
                     #     print("len(track)",len(track),"len(track[i]):",len(track[i]))
@@ -221,9 +252,7 @@ if __name__ == '__main__':
             #cv2.putText(image, button_name, (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 100, 100), 5, cv2.LINE_AA)
             #cv2.rectangle(image, (10, 60), (200, 120), (0, 255, 0), -1)
 
-                    # mp_drawing.draw_landmarks(
-                    #     image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-
+                  
             # 確保圖像大小相同
             sumi_img = cv2.resize(sumi_img, (image.shape[1], image.shape[0]))
 
