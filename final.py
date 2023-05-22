@@ -20,7 +20,7 @@ showSumi = True
 #button_pressed = False
 #button_name = "Capture"
 
-sumi_img = cv2.imread("resize.png")
+sumi_img = cv2.imread("resizeLINE.png")
 
 
 if __name__ == '__main__':
