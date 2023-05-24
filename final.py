@@ -248,10 +248,6 @@ if __name__ == '__main__':
                     cv2.imwrite('origen sktech at ' + str(int(time.time())) + '.jpg', image)
                 cv2.imshow('MediaPipe Hands', image)
 
-            if len(combine) == 2:
-                out = np.array(combine)
-                print('combine.shape:',out.shape)
-                print('combine:',combine)
             if cv2.waitKey(5) & 0xFF == 27:
                 break
     cap.release()
