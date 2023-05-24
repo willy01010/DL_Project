@@ -3,6 +3,7 @@ import mediapipe as mp
 import numpy as np
 import math
 import time
+import numpy as np
 
 result = ''
 track = []
@@ -13,12 +14,9 @@ c=0
 last_c_time = 0
 
 colorSelect = 0
-color=[]
 colorlist = [(255, 100, 0), (0, 255, 0), (0, 0, 255), (255, 0, 255), (255, 255, 0), (0, 255, 255)]#bgr 藍 綠 紅 紫 黃 青
 
 showSumi = True
-#button_pressed = False
-#button_name = "Capture"
 
 sumi_img = cv2.imread("resizeLINE.png")
 
@@ -170,46 +168,54 @@ if __name__ == '__main__':
                         else:
                             showSumi = True
                     
-                    if cv2.waitKey(5) & 0xFF == ord('1'):#選取顏色
-                        colorSelect = 0
-                    if cv2.waitKey(5) & 0xFF == ord('2'):
-                        colorSelect = 1
-                    if cv2.waitKey(5) & 0xFF == ord('3'):
-                        colorSelect = 2
-                    if cv2.waitKey(5) & 0xFF == ord('4'):
-                        colorSelect = 3
-                    if cv2.waitKey(5) & 0xFF == ord('5'):
-                        colorSelect = 4
-                    if cv2.waitKey(5) & 0xFF == ord('6'):
-                        colorSelect = 5                  
+                               
+
 
 
                     if status:
                         if change:
                             if time.time() - last_c_time > 1:
                                 c = c + 1
-                                color.append(colorlist[colorSelect])
                                 combine.append(track)
                                 track = []
                                 last_c_time = time.time()
                                 change = False
-                        track.append([INDEX_FINGER_TIP_X_value, INDEX_FINGER_TIP_Y_value])
+                        track.append([INDEX_FINGER_TIP_X_value, INDEX_FINGER_TIP_Y_value,colorlist[colorSelect]])
 
                         
 
                     cv2.circle(image, (int(INDEX_FINGER_TIP_X_value * image_width), int(INDEX_FINGER_TIP_Y_value * image_height)), 10, (0, 0, 255), -1)#當前手指位置
 
-                    
+            if cv2.waitKey(5) & 0xFF == ord('1'):#選取顏色
+                colorSelect = 0
+            if cv2.waitKey(5) & 0xFF == ord('2'):
+                colorSelect = 1
+            if cv2.waitKey(5) & 0xFF == ord('3'):
+                colorSelect = 2
+            if cv2.waitKey(5) & 0xFF == ord('4'):
+                colorSelect = 3
+            if cv2.waitKey(5) & 0xFF == ord('5'):
+                colorSelect = 4
+            if cv2.waitKey(5) & 0xFF == ord('6'):
+                colorSelect = 5     
+
+            for i in range(len(colorlist)):#show
+                    sy=60+50*i
+                    ex=100+50*i
+                    if i == colorSelect:
+                        cv2.rectangle(image, (20, sy), (70, ex), colorlist[i], -1)
+                    else:
+                        cv2.rectangle(image, (20, sy), (40, ex), colorlist[i], -1)          
     
             
             for i in range(1, len(track)):#當前筆畫畫出連接線
                 cv2.line(image, (int(track[i-1][0] * image_width), int(track[i-1][1] * image_height)),
-                        (int(track[i][0] * image_width), int(track[i][1] * image_height)), colorlist[colorSelect], 5)
+                        (int(track[i][0] * image_width), int(track[i][1] * image_height)), track[i][2], 5)
             
             for i in range(len(combine)):#歷史筆畫畫出連接線
                 for j in range(1, len(combine[i])):
                     cv2.line(image, (int(combine[i][j-1][0] * image_width), int(combine[i][j-1][1] * image_height)),
-                            (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), color[i], 5)
+                            (int(combine[i][j][0] * image_width), int(combine[i][j][1] * image_height)), combine[i][j][2], 5)
 
 
 
@@ -218,13 +224,8 @@ if __name__ == '__main__':
                         (0, 0, 255),
                         3, cv2.LINE_AA)
             
-            cv2.rectangle(image, (20, 60), (100, 100), colorlist[colorSelect], -1)
-                # -------------------------------------
 
-                    
-            
-            #cv2.putText(image, button_name, (20, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 100, 100), 5, cv2.LINE_AA)
-            #cv2.rectangle(image, (10, 60), (200, 120), (0, 255, 0), -1)
+                # -------------------------------------
 
                   
             # 確保圖像大小相同
@@ -247,7 +248,10 @@ if __name__ == '__main__':
                     cv2.imwrite('origen sktech at ' + str(int(time.time())) + '.jpg', image)
                 cv2.imshow('MediaPipe Hands', image)
 
-
+            if len(combine) == 2:
+                out = np.array(combine)
+                print('combine.shape:',out.shape)
+                print('combine:',combine)
             if cv2.waitKey(5) & 0xFF == 27:
                 break
     cap.release()
